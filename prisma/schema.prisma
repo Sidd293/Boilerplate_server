@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String?   @unique
+  phone        String?   @unique
+  passwordHash String?
+  createdAt    DateTime  @default(now())
+  actions      Action[]
+  otps         OtpCode[]
+}
+
+model Action {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum OtpPurpose {
+  SIGNUP
+  LOGIN
+  RESET
+}
+
+enum OtpChannel {
+  email
+  phone
+}
+
+model OtpCode {
+  id         String     @id @default(uuid())
+  identifier String
+  channel    OtpChannel
+  purpose    OtpPurpose
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+
+  @@index([identifier, purpose])
+}
