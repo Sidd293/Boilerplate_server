@@ -4,7 +4,7 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm ci
+RUN npm ci --include=dev
 
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
